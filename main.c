@@ -122,6 +122,32 @@ void adicionar_caractere_string(STRING *string, char caractere) {
     *string = segunda_string;
 }
 
+void copiar_pastas(REGISTRO** pasta1, REGISTRO** pasta2) {
+    int i;
+    for (i=0; pasta1[i]!=NULL && pasta2[i]!=NULL; i++) {
+        pasta1[i] = pasta2[i];
+    }
+    pasta1[i]=NULL;
+}
+
+void adicionar_registro_pasta(REGISTRO** pasta, REGISTRO* registro) {
+    
+    REGISTRO** segunda_pasta;
+
+    if (pasta[0] == NULL) {
+        segunda_pasta = (REGISTRO**) malloc(sizeof(REGISTRO*)*2);
+        segunda_pasta[0] = registro;
+        segunda_pasta[1] = NULL;
+    } else {
+        segunda_pasta = (REGISTRO**) malloc(sizeof(REGISTRO*)*(tam_pasta(pasta)+2));
+        segunda_pasta[tam_pasta(pasta)+1] = NULL;
+        copiar_pastas(segunda_pasta, pasta);
+        segunda_pasta[tam_pasta(pasta)] = registro;
+    }
+    limpar_pasta(pasta);
+    pasta = segunda_pasta;
+}
+
 PASTA carregar_dados(STRING nomeArquivoInsercao) {
     FILE* arq;
     arq = abrir_arquivo_binario(nomeArquivoInsercao);

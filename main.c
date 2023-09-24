@@ -1,31 +1,4 @@
-#include <stdio.h>
-#include <stdbool.h>
-#include <stdlib.h>
-#include <math.h>
-#include <limits.h>
-#include <time.h>
-#include <string.h>
-#include <ctype.h>
-
-typedef size_t ENDERECO;
-typedef int* NUMERO;
-typedef int** CONJUNTO;
-typedef char* STRING;
-typedef char** PARAGRAFO;
-typedef char*** TEXTO;
-
-typedef struct dados{
-    STRING codCliente;
-    STRING codVeiculo;
-    STRING nomeCliente;
-    STRING nomeVeiculo;
-    NUMERO quantDias;
-} DADOS;
-
-typedef DADOS* REGISTRO;
-typedef DADOS** PASTA;
-typedef DADOS*** GAVETA;
-
+#include "header.h"
 
 /*Criação das Alocações Dinâmicas*/
 
@@ -100,83 +73,153 @@ void limpar_pasta(PASTA* pst) {
 }
 
 
-/*Adição nas Alocações Dinâmicas*/
+FILE* abrir_arquivo_binario(STRING nome_do_arquivo) {
 
-void add_caractere_string(STRING* str, char caractere);
-void add_string_string(STRING* str1, STRING* str2);
-void add_string_paragrafo(PARAGRAFO* par, STRING* str);
-void add_paragrafo_paragrafo(PARAGRAFO* par1, PARAGRAFO* par2);
-void add_registro_pasta(PASTA* pst, REGISTRO* reg);
-void add_pasta_pasta(PASTA* pst1, PASTA* pst2);
+    FILE* arq;
+    bool inexistencia;
+    char recado[64];
 
-
-/*Remoção nas Alocações Dinâmicas*/
-
-void rmv_first_caractere_string(STRING* str);
-void rmv_first_string_paragrafo(PARAGRAFO* par);
-void rmv_first_registro_pasta(PASTA* pst);
-
-void rmv_last_caractere_string(STRING* str);
-void rmv_last_string_paragrafo(PARAGRAFO* par);
-void rmv_last_registro_pasta(PASTA* pst);
+    arq = fopen(nome_do_arquivo, "rb");
+    inexistencia = (arq == NULL);
 
 
-/*Copia nas Alocações Dinâmicas*/
-
-STRING copiar_string(STRING* str);
-PARAGRAFO copiar_paragrafo(PARAGRAFO* par);
-REGISTRO copiar_registro(REGISTRO* reg);
-PASTA copiar_pasta(PASTA* pst);
-
-
-/*Tamanho nas Alocações Dinâmicas*/
-
-size_t tam_paragrafo(PARAGRAFO* par);
-size_t tam_registro(REGISTRO* reg);
-size_t tam_pasta(PASTA* pst);
-
-/*Comparação nas Alocações Dinâmicas*/
-
-int comparar_paragrafos(PARAGRAFO* par1, PARAGRAFO* par2);
-int comparar_registros(REGISTRO* reg1, REGISTRO* reg2);
-int comparar_pastas(PASTA* pst1, PASTA* pst2);
-
-    void atualiza_log(char* sentenca) {
-
-        bool inexistencia;
-        FILE* log;
-        
-        log = fopen("log.txt", "r");
-        
-        if (log == NULL) {
-            inexistencia = true;
-        } else {
-            inexistencia = false;
-        }
-
-        fclose(log);
-
-        log = fopen("log.txt", "a+");
-        if (inexistencia) {
-            fprintf(log,"       REGISTRO DE ATIVIDADE:\n");
-        }
-        fprintf(log,"  # %s\n", sentenca);
-        fclose(log);
+    if (inexistencia) {
+        strcpy(recado, "Arquivo Binário \"");
+        strcat(recado, nome_do_arquivo);
+        strcat(recado, "\" Inexistente.");
+        atualiza_log(recado);
+        return NULL;
+    } else {
+        fclose(arq);
     }
 
-    void limpar_log() {
-        remove("log.txt");
-    }
 
+    strcpy(recado, "Arquivo Binário \"");
+    strcat(recado, nome_do_arquivo);
+    strcat(recado, "\" Aberto.");
+    atualiza_log(recado);
+
+    arq = fopen(nome_do_arquivo, "r+b");
+    return arq;
+}
+
+//Funcoes de trabalho com strings de tamanho variavel.
+
+void adicionar_caractere_string(STRING *string, char caractere) {
+    STRING segunda_string;
+
+    if ((*string)[0] == '\0') {
+        segunda_string = (STRING) malloc(sizeof(char) * 2);
+        segunda_string[0] = caractere;
+        segunda_string[1] = '\0';
+    } else {
+        segunda_string = (STRING) malloc(sizeof(char) * (strlen(*string) + 2));
+        segunda_string[strlen(*string) + 1] = '\0';
+        strcpy(segunda_string, *string);
+        segunda_string[strlen(*string)] = caractere;
+    }
+    limpar_string(*string);
+    *string = segunda_string;
+}
+
+PASTA carregar_dados(STRING nomeArquivoInsercao) {
+    FILE* arq;
+    arq = abrir_arquivo_binario(nomeArquivoInsercao);
+    if (arq == NULL) {
+        // Tratamento de erro: não foi possível abrir o arquivo.
+        perror("Erro ao abrir o arquivo binário");
+        return NULL;
+    }
+    printf("Existe");
+    int i;
+    int cont;
+    char caractere;
+    PASTA pasta = criar_pasta();
+    REGISTRO registro;
+    bool fim_de_arquivo = false;
+
+    STRING inteiro = "0"; 
+    atoi(inteiro);
+
+    for (i=0; !fim_de_arquivo; i++) {
+    printf("\nLaco %d fim do arquivo = %d", i, fim_de_arquivo);
+        
+        registro = criar_registro();
+        inteiro = criar_string();
+        printf("\nPos %d\n", i);
+
+        while(((cont = fread(&caractere,sizeof(char),1,arq)) != 0) && caractere != '\0'){
+
+            adicionar_caractere_string(registro->codCliente,caractere);
+        }
+
+            printf("\nPos1 %d\n", i);
+
+        while(((cont = fread(&caractere,sizeof(char),1,arq)) != 0) && caractere != '\0'){
+
+            adicionar_caractere_string(registro->codVeiculo,caractere);
+        }
+
+            printf("\nPos2 %d\n", i);
+
+        while(((cont = fread(&caractere,sizeof(char),1,arq)) != 0) && caractere != '\0'){
+
+            adicionar_caractere_string(registro->nomeCliente,caractere);
+        }
+
+            printf("\nPos3 %d\n", i);
+
+        for (fread(&caractere,sizeof(char),1,arq);caractere == '\0';fread(&caractere,sizeof(char),1,arq)) {}
+        fseek(arq,(-1)*sizeof(char),SEEK_CUR);
+
+        printf("\nPos4 %d\n", i);
+
+        while(((cont = fread(&caractere,sizeof(char),1,arq)) != 0) && caractere != '\0'){
+
+            adicionar_caractere_string(registro->nomeVeiculo,caractere);
+        }
+
+            printf("\nPos5 %d\n", i);
+
+        for (fread(&caractere,sizeof(char),1,arq);caractere == '\0';fread(&caractere,sizeof(char),1,arq)) {}
+        fseek(arq,(-1)*sizeof(char),SEEK_CUR);
+
+        printf("\nPos6 %d\n", i);
+
+        while(((cont = fread(&caractere,sizeof(char),1,arq)) != 0) && caractere != '\0'){
+
+            adicionar_caractere_string(inteiro,caractere);
+        }
+
+            printf("\nPos7 %d\n", i);
+
+        for (fread(&caractere,sizeof(char),1,arq);caractere == '\0';fread(&caractere,sizeof(char),1,arq)) {}
+        fseek(arq,(-1)*sizeof(char),SEEK_CUR);
+        printf("\nPos8 %d\n", i);
+
+        *(registro->quantDias) = atoi(inteiro);
+        limpar_string(inteiro);
+
+        if (cont==0) {
+            limpar_registro(registro);
+            limpar_string(inteiro);
+            fim_de_arquivo = true;
+            break;
+        }
+        adicionar_registro_pasta(pasta,registro);
+    }
+    atualiza_log("Arquivo Dados Carregado.");
+    return pasta;
+}
 
 int main() {
 
     //FILE* arq = abrir_criar_arq_bin("Data.bin");
-    REGISTRO* registro;
+    REGISTRO registro;
     bool load_de_arquivos = false;
     int opcao;
-    REGISTRO** pasta;
-    char** chaveiro;
+    PASTA pasta;
+    PARAGRAFO chaveiro;
 
     do {
         atualiza_log("Execucao do Menu");
@@ -200,10 +243,10 @@ int main() {
                 printf("Compactacao:\n");
                 break;
             case 3:
-                // pasta = carregar_dados("insere.bin");
-                // chaveiro = carregar_chaves_delecao("remove.bin");
-                // atualiza_log("Arquivos carregados");
-                // load_de_arquivos = true;
+                pasta = carregar_dados("insere.bin");
+                chaveiro = carregar_chaves_delecao("remove.bin");
+                atualiza_log("Arquivos carregados");
+                load_de_arquivos = true;
                 break;
             case 4:
                 limpar_log();

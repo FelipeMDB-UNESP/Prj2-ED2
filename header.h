@@ -68,29 +68,29 @@ int comparar_paragrafos(PARAGRAFO* par1, PARAGRAFO* par2);
 int comparar_registros(REGISTRO* reg1, REGISTRO* reg2);
 int comparar_pastas(PASTA* pst1, PASTA* pst2);
 
-    void atualiza_log(char* sentenca) {
+void atualiza_log(char* sentenca) {
 
-        bool inexistencia;
-        FILE* log;
-        
-        log = fopen("log.txt", "r");
-        
-        if (log == NULL) {
-            inexistencia = true;
-        } else {
-            inexistencia = false;
-        }
-
-        fclose(log);
-
-        log = fopen("log.txt", "a+");
-        if (inexistencia) {
-            fprintf(log,"       REGISTRO DE ATIVIDADE:\n");
-        }
-        fprintf(log,"  # %s\n", sentenca);
-        fclose(log);
+    bool inexistencia;
+    FILE* log;
+    
+    log = fopen("log.txt", "r");
+    
+    if (log == NULL) {
+        inexistencia = true;
+    } else {
+        inexistencia = false;
     }
 
-    void limpar_log() {
-        remove("log.txt");
+    fclose(log);
+
+    log = fopen("log.txt", "a+");
+    if (inexistencia) {
+        fprintf(log,"       REGISTRO DE ATIVIDADE:\n");
     }
+    fprintf(log,"  # %s\n", sentenca);
+    fclose(log);
+}
+
+void limpar_log() {
+    remove("log.txt");
+}

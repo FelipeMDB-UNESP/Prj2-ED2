@@ -1,5 +1,38 @@
 #include "header.h"
 
+
+STRING copiar_string(STRING* str) {
+
+}
+
+PARAGRAFO copiar_paragrafo(PARAGRAFO* par) {
+
+}
+
+REGISTRO copiar_registro(REGISTRO* reg) {
+
+}
+
+PASTA copiar_pasta(PASTA* pst) {
+
+}
+
+
+/*Tamanho nas Alocações Dinâmicas*/
+
+size_t tam_paragrafo(PARAGRAFO* par) {
+
+}
+
+size_t tam_registro(REGISTRO* reg) {
+
+}
+
+size_t tam_pasta(PASTA* pst) {
+    
+}
+
+
 /*Criação das Alocações Dinâmicas*/
 
 NUMERO criar_numero() {
@@ -118,7 +151,7 @@ void adicionar_caractere_string(STRING *string, char caractere) {
         strcpy(segunda_string, *string);
         segunda_string[strlen(*string)] = caractere;
     }
-    limpar_string(*string);
+    limpar_string(string);
     *string = segunda_string;
 }
 
@@ -176,21 +209,21 @@ PASTA carregar_dados(STRING nomeArquivoInsercao) {
 
         while(((cont = fread(&caractere,sizeof(char),1,arq)) != 0) && caractere != '\0'){
 
-            adicionar_caractere_string(registro->codCliente,caractere);
+            adicionar_caractere_string(&registro->codCliente,caractere);
         }
 
             printf("\nPos1 %d\n", i);
 
         while(((cont = fread(&caractere,sizeof(char),1,arq)) != 0) && caractere != '\0'){
 
-            adicionar_caractere_string(registro->codVeiculo,caractere);
+            adicionar_caractere_string(&registro->codVeiculo,caractere);
         }
 
             printf("\nPos2 %d\n", i);
 
         while(((cont = fread(&caractere,sizeof(char),1,arq)) != 0) && caractere != '\0'){
 
-            adicionar_caractere_string(registro->nomeCliente,caractere);
+            adicionar_caractere_string(&registro->nomeCliente,caractere);
         }
 
             printf("\nPos3 %d\n", i);
@@ -202,7 +235,7 @@ PASTA carregar_dados(STRING nomeArquivoInsercao) {
 
         while(((cont = fread(&caractere,sizeof(char),1,arq)) != 0) && caractere != '\0'){
 
-            adicionar_caractere_string(registro->nomeVeiculo,caractere);
+            adicionar_caractere_string(&registro->nomeVeiculo,caractere);
         }
 
             printf("\nPos5 %d\n", i);
@@ -214,7 +247,7 @@ PASTA carregar_dados(STRING nomeArquivoInsercao) {
 
         while(((cont = fread(&caractere,sizeof(char),1,arq)) != 0) && caractere != '\0'){
 
-            adicionar_caractere_string(inteiro,caractere);
+            adicionar_caractere_string(&inteiro,caractere);
         }
 
             printf("\nPos7 %d\n", i);
@@ -224,15 +257,15 @@ PASTA carregar_dados(STRING nomeArquivoInsercao) {
         printf("\nPos8 %d\n", i);
 
         *(registro->quantDias) = atoi(inteiro);
-        limpar_string(inteiro);
+        limpar_string(&inteiro);
 
         if (cont==0) {
-            limpar_registro(registro);
-            limpar_string(inteiro);
+            limpar_registro(&registro);
+            limpar_string(&inteiro);
             fim_de_arquivo = true;
             break;
         }
-        adicionar_registro_pasta(pasta,registro);
+        adicionar_registro_pasta(&pasta,&registro);
     }
     atualiza_log("Arquivo Dados Carregado.");
     return pasta;
@@ -270,7 +303,7 @@ int main() {
                 break;
             case 3:
                 pasta = carregar_dados("insere.bin");
-                chaveiro = carregar_chaves_delecao("remove.bin");
+                //chaveiro = carregar_chaves_delecao("remove.bin");
                 atualiza_log("Arquivos carregados");
                 load_de_arquivos = true;
                 break;

@@ -1,5 +1,7 @@
 #include "header.h"
 
+//Fazer os codigos abaixo para implementacao da main
+#pragma region fazer_os_codigos
 
 STRING copiar_string(STRING* str) {
 
@@ -18,6 +20,7 @@ PASTA copiar_pasta(PASTA* pst) {
 }
 
 
+
 /*Tamanho nas Alocações Dinâmicas*/
 
 size_t tam_paragrafo(PARAGRAFO* par) {
@@ -29,9 +32,10 @@ size_t tam_registro(REGISTRO* reg) {
 }
 
 size_t tam_pasta(PASTA* pst) {
-    
+
 }
 
+#pragma endregion fazer_os_codigos
 
 /*Criação das Alocações Dinâmicas*/
 

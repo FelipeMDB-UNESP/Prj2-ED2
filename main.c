@@ -4,19 +4,40 @@
 #pragma region fazer_os_codigos
 
 STRING copiar_string(STRING* str) {
-
+    STRING new = (STRING) malloc(strlen(*str)+1);
+    strcpy(new,*str);
+    return new;
 }
 
 PARAGRAFO copiar_paragrafo(PARAGRAFO* par) {
-
+    PARAGRAFO new = (PARAGRAFO) malloc(sizeof(*par));
+    for (int i=0; (*par)[i]!=NULL ;i++) {
+        new[i] = copiar_string((*par)[i]);
+    }
+    new[i]=NULL;
+    return new;
 }
 
 REGISTRO copiar_registro(REGISTRO* reg) {
+    REGISTRO new = criar_registro();
 
+    new->codCliente = copiar_string((*reg)->codCliente);
+    new->codVeiculo = copiar_string((*reg)->codVeiculo);
+    new->nomeCliente = copiar_string((*reg)->nomeCliente);
+    new->nomeVeiculo = copiar_string((*reg)->nomeVeiculo);
+    new->quantDias = criar_numero();
+    *(new->quantDias) = *((*reg)->quantDias);
+
+    return new;
 }
 
 PASTA copiar_pasta(PASTA* pst) {
-
+    PASTA new = (PASTA) malloc(sizeof(*pst));
+    for (int i=0; (*pst)[i]!=NULL ;i++) {
+        new[i] = copiar_registro((*pst)[i]);
+    }
+    new[i]=NULL;
+    return new;
 }
 
 
@@ -24,19 +45,20 @@ PASTA copiar_pasta(PASTA* pst) {
 /*Tamanho nas Alocações Dinâmicas*/
 
 size_t tam_paragrafo(PARAGRAFO* par) {
-
+    return (sizeof(*par));
 }
 
 size_t tam_registro(REGISTRO* reg) {
-
+    return(sizeof(*reg));
 }
 
 size_t tam_pasta(PASTA* pst) {
-
+    return (sizeof(*pst));
 }
 
 #pragma endregion fazer_os_codigos
 
+#pragma region Codigo_Feito
 /*Criação das Alocações Dinâmicas*/
 
 NUMERO criar_numero() {
@@ -109,6 +131,7 @@ void limpar_pasta(PASTA* pst) {
     free(*pst);
 }
 
+#pragma endregion Codigo_Feito
 
 FILE* abrir_arquivo_binario(STRING nome_do_arquivo) {
 

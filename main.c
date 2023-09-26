@@ -11,9 +11,11 @@ STRING copiar_string(STRING* str) {
 
 PARAGRAFO copiar_paragrafo(PARAGRAFO* par) {
     PARAGRAFO new = (PARAGRAFO) malloc(sizeof(*par));
-    for (int i=0; (*par)[i]!=NULL ;i++) {
+    int i = 0;
+    for (i=0; (*par)[i]!=NULL ;i++) {
         new[i] = copiar_string((*par)[i]);
     }
+    //TODO: tá certo esse i fora do FOR?????
     new[i]=NULL;
     return new;
 }
@@ -33,9 +35,11 @@ REGISTRO copiar_registro(REGISTRO* reg) {
 
 PASTA copiar_pasta(PASTA* pst) {
     PASTA new = (PASTA) malloc(sizeof(*pst));
-    for (int i=0; (*pst)[i]!=NULL ;i++) {
+    int i;
+    for (i=0; (*pst)[i]!=NULL ;i++) {
         new[i] = copiar_registro((*pst)[i]);
     }
+    //TODO: tá certo esse i fora do FOR?????
     new[i]=NULL;
     return new;
 }
@@ -297,6 +301,8 @@ PASTA carregar_dados(STRING nomeArquivoInsercao) {
     atualiza_log("Arquivo Dados Carregado.");
     return pasta;
 }
+
+
 
 int main() {
 

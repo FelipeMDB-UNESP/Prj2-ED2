@@ -3,6 +3,120 @@
 //Fazer os codigos abaixo para implementacao da main
 #pragma region fazer_os_codigos
 
+/*Adição nas Alocações Dinâmicas*/
+
+// WORKING ON IT - MESTRE
+void add_caractere_string(STRING* str, char caractere){
+    STRING novaString;
+    novaString = (STRING) malloc(sizeof(char) * strlen(*str) + 2);
+    novaString[strlen(*str) + 1] = '\0';
+    strcpy(novaString, *str);
+    novaString[strlen(*str)] = caractere;
+    limpar_string(str);
+    *str = novaString;
+}
+
+void add_string_string(STRING* str1, STRING* str2){
+    STRING novaString;
+    novaString = (STRING) malloc(sizeof(char) * strlen(*str) + 2);
+
+}
+
+void add_string_paragrafo(PARAGRAFO* par, STRING* str);
+void add_paragrafo_paragrafo(PARAGRAFO* par1, PARAGRAFO* par2);
+void add_registro_pasta(PASTA* pst, REGISTRO* reg);
+void add_pasta_pasta(PASTA* pst1, PASTA* pst2);
+
+#pragma endregion fazer_os_codigos
+
+#pragma region Codigo_Feito
+/*Criação das Alocações Dinâmicas*/
+
+//Aloca espaço para um int
+NUMERO criar_numero() {
+    NUMERO num = (NUMERO) malloc(sizeof(int));
+    *num = -1;
+    return num;
+}
+
+//Aloca espaço para um vetor de caracteres unitario
+STRING criar_string() {
+    STRING str = (STRING) malloc(sizeof(char));
+    str[0]='\0';
+    return str;
+}
+
+//Aloca espaço para um vetor de strings unitario
+PARAGRAFO criar_paragrafo() {
+    PARAGRAFO par = (PARAGRAFO) malloc(sizeof(STRING));
+    par[0] = NULL;
+    return par;
+}
+
+//Aloca espaço para um registro de dados
+REGISTRO criar_registro() {
+    REGISTRO reg = (REGISTRO) malloc(sizeof(DADOS));
+    reg->codCliente = criar_string();
+    reg->codVeiculo = criar_string();
+    reg->nomeCliente = criar_string();
+    reg->nomeVeiculo = criar_string();
+    reg->quantDias = criar_numero();
+    return reg;
+}
+
+//Aloca espaço para um vetor de registros unitario
+PASTA criar_pasta() {
+    PASTA pst = (PASTA) malloc(sizeof(REGISTRO));
+    pst[0]=NULL;
+    return pst;
+}
+
+
+/*Limpeza das Alocações Dinâmicas*/
+
+//Limpar a alocação de um int
+void limpar_numero(NUMERO* num) {
+    free(*num);
+}
+
+//Limpar a alocação de um vetor de caracteres
+void limpar_string(STRING* str) {
+    free(*str);
+}
+
+//Limpar a alocação de um vetor de strings
+void limpar_parafrago(PARAGRAFO* par) {
+    int i;
+    for (i=0; (*par)[i] != NULL; i++) {
+        limpar_string(&(*par)[i]);
+    }
+    free(*par);
+}
+
+//Limpar a alocação de um registro de dados
+void limpar_registro(REGISTRO* reg) {
+    limpar_string(&(*reg)->codCliente);
+    limpar_string(&(*reg)->codVeiculo);
+    limpar_string(&(*reg)->nomeCliente);
+    limpar_string(&(*reg)->nomeVeiculo);
+    limpar_numero(&(*reg)->quantDias);
+    free(*reg);
+}
+
+//Limpar a alocação de um vetor de registros
+void limpar_pasta(PASTA* pst) {
+    int i;
+    //
+    for (i=0; (*pst)[i] != NULL; i++) {
+        limpar_registro(&((*pst)[i]));
+    }
+    free(*pst);
+}
+
+
+/*Copia nas Alocações Dinâmicas*/
+
+
 STRING copiar_string(STRING* str) {
     STRING new = (STRING) malloc(strlen(*str)+1);
     strcpy(new,*str);
@@ -11,11 +125,10 @@ STRING copiar_string(STRING* str) {
 
 PARAGRAFO copiar_paragrafo(PARAGRAFO* par) {
     PARAGRAFO new = (PARAGRAFO) malloc(sizeof(*par));
-    int i = 0;
-    for (i=0; (*par)[i]!=NULL ;i++) {
-        new[i] = copiar_string((*par)[i]);
+    int i;
+    for (int i=0; (*par)[i]!=NULL; i++) {
+        new[i] = copiar_string(&((*par)[i]));
     }
-    //TODO: tá certo esse i fora do FOR?????
     new[i]=NULL;
     return new;
 }
@@ -23,10 +136,10 @@ PARAGRAFO copiar_paragrafo(PARAGRAFO* par) {
 REGISTRO copiar_registro(REGISTRO* reg) {
     REGISTRO new = criar_registro();
 
-    new->codCliente = copiar_string((*reg)->codCliente);
-    new->codVeiculo = copiar_string((*reg)->codVeiculo);
-    new->nomeCliente = copiar_string((*reg)->nomeCliente);
-    new->nomeVeiculo = copiar_string((*reg)->nomeVeiculo);
+    new->codCliente = copiar_string(&((*reg)->codCliente));
+    new->codVeiculo = copiar_string(&((*reg)->codVeiculo));
+    new->nomeCliente = copiar_string(&((*reg)->nomeCliente));
+    new->nomeVeiculo = copiar_string(&((*reg)->nomeVeiculo));
     new->quantDias = criar_numero();
     *(new->quantDias) = *((*reg)->quantDias);
 
@@ -37,13 +150,11 @@ PASTA copiar_pasta(PASTA* pst) {
     PASTA new = (PASTA) malloc(sizeof(*pst));
     int i;
     for (i=0; (*pst)[i]!=NULL ;i++) {
-        new[i] = copiar_registro((*pst)[i]);
+        new[i] = copiar_registro(&((*pst)[i]));
     }
-    //TODO: tá certo esse i fora do FOR?????
     new[i]=NULL;
     return new;
 }
-
 
 
 /*Tamanho nas Alocações Dinâmicas*/
@@ -58,81 +169,6 @@ size_t tam_registro(REGISTRO* reg) {
 
 size_t tam_pasta(PASTA* pst) {
     return (sizeof(*pst));
-}
-
-#pragma endregion fazer_os_codigos
-
-#pragma region Codigo_Feito
-/*Criação das Alocações Dinâmicas*/
-
-NUMERO criar_numero() {
-    NUMERO num = (NUMERO) malloc(sizeof(int));
-    *num = -1;
-    return num;
-}
-
-STRING criar_string() {
-    STRING str = (STRING) malloc(sizeof(char));
-    str[0]='\0';
-    return str;
-}
-
-PARAGRAFO criar_paragrafo() {
-    PARAGRAFO par = (PARAGRAFO) malloc(sizeof(STRING));
-    par[0] = NULL;
-    return par;
-}
-
-REGISTRO criar_registro() {
-    REGISTRO reg = (REGISTRO) malloc(sizeof(DADOS));
-    reg->codCliente = criar_string();
-    reg->codVeiculo = criar_string();
-    reg->nomeCliente = criar_string();
-    reg->nomeVeiculo = criar_string();
-    reg->quantDias = criar_numero();
-    return reg;
-}
-
-PASTA criar_pasta() {
-    PASTA pst = (PASTA) malloc(sizeof(REGISTRO));
-    pst[0]=NULL;
-    return pst;
-}
-
-
-/*Limpeza das Alocações Dinâmicas*/
-
-void limpar_numero(NUMERO* num) {
-    free(*num);
-}
-
-void limpar_string(STRING* str) {
-    free(*str);
-}
-
-void limpar_parafrago(PARAGRAFO* par) {
-    int i;
-    for (i=0; (*par)[i] != NULL; i++) {
-        limpar_string(&(*par)[i]);
-    }
-    free(*par);
-}
-
-void limpar_registro(REGISTRO* reg) {
-    limpar_string(&(*reg)->codCliente);
-    limpar_string(&(*reg)->codVeiculo);
-    limpar_string(&(*reg)->nomeCliente);
-    limpar_string(&(*reg)->nomeVeiculo);
-    limpar_numero(&(*reg)->quantDias);
-    free(*reg);
-}
-
-void limpar_pasta(PASTA* pst) {
-    int i;
-    for (i=0; (*pst)[i] != NULL; i++) {
-        limpar_registro(&((*pst)[i]));
-    }
-    free(*pst);
 }
 
 #pragma endregion Codigo_Feito

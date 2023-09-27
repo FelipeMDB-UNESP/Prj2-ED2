@@ -18,7 +18,6 @@ void add_caractere_string(STRING* str, char caractere){
 
 void add_string_string(STRING* str1, STRING* str2){
     STRING novaString;
-    novaString = (STRING) malloc(sizeof(char) * strlen(*str) + 2);
 
 }
 

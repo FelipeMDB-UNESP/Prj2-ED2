@@ -21,7 +21,8 @@ void add_string_string(STRING* str1, STRING* str2) {
     STRING novaString;
     novaString = (STRING) malloc(strlen(*str1) + strlen(*str2) + 1);
     copiar_string(&novaString, str1);
-    copiar_string(&novaString, str2);
+    strcat(&novaString, str2);
+    //copiar_string(&novaString, str2);
     limpar_string(str1);
     *str1 = novaString;
 }
@@ -50,7 +51,7 @@ void add_paragrafo_paragrafo(PARAGRAFO* par1, PARAGRAFO* par2) {
     int i;
     size_t tam1 = tam_paragrafo(par1);
     size_t tam2 = tam_paragrafo(par2);
-    PARAGRAFO novoParagrafo = (PARAGRAFO) malloc(sizeof(STRING) * (tam1 + tam2));
+    PARAGRAFO novoParagrafo = (PARAGRAFO) malloc(sizeof(STRING) * (tam1 + tam2 + 1));
 
     for (i = 0; i < tam1; i++) {
         novoParagrafo[i] = (STRING) malloc(strlen(*par1[i]) + 1);
@@ -199,7 +200,7 @@ void copiar_string(STRING* new, STRING* str) {
 void copiar_paragrafo(PARAGRAFO* new, PARAGRAFO* par) {
     int i;
     for (int i=0; (*par)[i]!= NULL; i++) {
-        copiar_string(new[i], par[i]);
+        copiar_string(&(*new)[i], &(*par)[i]);
     }
     new[i]=NULL;
 }
@@ -216,7 +217,7 @@ void copiar_registro(REGISTRO* new, REGISTRO* reg) {
 void copiar_pasta(PASTA* new, PASTA* pst) {
     int i;
     for (i=0; (*pst)[i] != NULL; i++) {
-        copiar_registro(new[i], pst[i]);
+        copiar_registro(&(*new)[i], &(*pst)[i]);
     }
     new[i] = NULL;
 }

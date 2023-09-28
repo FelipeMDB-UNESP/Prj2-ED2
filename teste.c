@@ -30,20 +30,26 @@ void add_string_string(STRING* str1, STRING* str2) {
 void add_string_paragrafo(PARAGRAFO* par, STRING* str) {
     
     int i;
-    size_t tam = tam_paragrafo(par);
+    int tam = tam_paragrafo(par);
     PARAGRAFO novoParagrafo;
-    novoParagrafo = (PARAGRAFO) malloc(sizeof(STRING) * (tam + 1));
+    novoParagrafo = (PARAGRAFO) malloc(sizeof(STRING) * (tam + 2));
     
     //Loop copiando strings de par para novoParagrafo
     for (int i = 0; i < tam; i++) {
         novoParagrafo[i] = (*par)[i];
     }
 
-    //Alocando um espaco dentro de novoParagrafo (tam = tamanho da string) para inserirmos str
-    novoParagrafo[tam] = (STRING) malloc(strlen(*str) + 1);
+    //Insere a string e o NULL do final do paragrafo
+    novoParagrafo[tam] = *str;
+    novoParagrafo[tam+1] = NULL;
 
-    copiar_string(&novoParagrafo[tam], str);
-    limpar_paragrafo(par);
+    //Limpa a alocação anterior, sem limpar os ponteiros internos
+    free(*par);
+
+    //Coloca a string recebida apontando para NULL a fim de evitar problemas de segmentation fault
+    *str = NULL;
+
+    //Passa o novo paragrafo criado ao endereço recebido como parâmetro
     *par = novoParagrafo;
 }
 
@@ -224,8 +230,11 @@ void copiar_pasta(PASTA* new, PASTA* pst) {
 
 /*Tamanho nas Alocações Dinâmicas*/
 
-size_t tam_paragrafo(PARAGRAFO* par) {
-    return (sizeof(*par));
+int tam_paragrafo(PARAGRAFO* par) {
+    int i;
+    for (i=0; (*par)[i] != NULL; i++) {
+    }
+    return i;
 }
 
 size_t tam_registro(REGISTRO* reg) {

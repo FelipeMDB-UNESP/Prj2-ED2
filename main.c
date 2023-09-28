@@ -10,7 +10,7 @@ void add_caractere_string(STRING* str, char caractere){
     STRING novaString;
     novaString = (STRING) malloc(sizeof(char) * strlen(*str) + 2);
     novaString[strlen(*str) + 1] = '\0';
-    strcpy(novaString, *str);
+    copiar_string(&novaString, str);
     novaString[strlen(*str)] = caractere;
     limpar_string(str);
     *str = novaString;
@@ -116,10 +116,8 @@ void limpar_pasta(PASTA* pst) {
 /*Copia nas Alocações Dinâmicas*/
 
 
-STRING copiar_string(STRING* str) {
-    STRING new = (STRING) malloc(strlen(*str)+1);
-    strcpy(new,*str);
-    return new;
+void copiar_string(STRING* new, STRING* str) {
+    strcpy(*new,*str);
 }
 
 PARAGRAFO copiar_paragrafo(PARAGRAFO* par) {

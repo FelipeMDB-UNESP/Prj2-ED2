@@ -1,12 +1,10 @@
 #include "header.h"
-void limpar_string(STRING* str);
 
-//Fazer os codigos abaixo para implementacao da main
-#pragma region fazer_os_codigos
+
+#pragma region codigo_feito
 
 /*Adição nas Alocações Dinâmicas*/
 
-// WORKING ON IT - MESTRE
 void add_caractere_string(STRING* str, char caractere) {
     STRING novaString;
     novaString = (STRING) malloc(sizeof(char) * strlen(*str) + 2);
@@ -21,8 +19,7 @@ void add_string_string(STRING* str1, STRING* str2) {
     STRING novaString;
     novaString = (STRING) malloc(strlen(*str1) + strlen(*str2) + 1);
     copiar_string(&novaString, str1);
-    strcat(&novaString, str2);
-    //copiar_string(&novaString, str2);
+    strcat(novaString, *str2);
     limpar_string(str1);
     *str1 = novaString;
 }
@@ -53,10 +50,11 @@ void add_string_paragrafo(PARAGRAFO* par, STRING* str) {
     *par = novoParagrafo;
 }
 
+/*
 void add_paragrafo_paragrafo(PARAGRAFO* par1, PARAGRAFO* par2) {
     int i;
-    size_t tam1 = tam_paragrafo(par1);
-    size_t tam2 = tam_paragrafo(par2);
+    int tam1 = tam_paragrafo(par1);
+    int tam2 = tam_paragrafo(par2);
     PARAGRAFO novoParagrafo = (PARAGRAFO) malloc(sizeof(STRING) * (tam1 + tam2 + 1));
 
     for (i = 0; i < tam1; i++) {
@@ -72,29 +70,33 @@ void add_paragrafo_paragrafo(PARAGRAFO* par1, PARAGRAFO* par2) {
     limpar_paragrafo(par1);
     *par1 = novoParagrafo;
 }
+*/
 
 void add_registro_pasta(PASTA* pst, REGISTRO* reg) {
     int i;
-    size_t tam = tam_pasta(pst);
+    int tam = tam_pasta(pst);
     PASTA novaPasta;
-    novaPasta = (PASTA) malloc(sizeof(REGISTRO) * (tam + 1));
+    novaPasta = (PASTA) malloc(sizeof(REGISTRO) * (tam + 2));
     
     for (int i = 0; i < tam; i++) {
         novaPasta[i] = (*pst)[i];
     }
 
-    novaPasta[tam] = (REGISTRO) malloc(sizeof(*reg));
+    novaPasta[tam] = *reg;
+    novaPasta[tam+1] = NULL;
 
-    copiar_registro(&novaPasta[tam], reg);
-    limpar_pasta(pst);
+    free(pst);
+
+    *reg = NULL;
+    
     *pst = novaPasta;
 }
-
+/*
 void add_pasta_pasta(PASTA* pst1, PASTA* pst2) {
     int i;
-    size_t tam1 = tam_pasta(pst1);
-    size_t tam2 = tam_pasta(pst2);
-    PASTA novaPasta = (PASTA) malloc(sizeof(REGISTRO) * (tam1 + tam2));
+    int tam1 = tam_pasta(pst1);
+    int tam2 = tam_pasta(pst2);
+    PASTA novaPasta = (PASTA) malloc(sizeof(REGISTRO) * (tam1 + tam2 + 1));
 
     for (i = 0; i < tam1; i++) {
         novaPasta[i] = (REGISTRO) malloc(sizeof(*pst1[i]) + 1);
@@ -109,10 +111,7 @@ void add_pasta_pasta(PASTA* pst1, PASTA* pst2) {
     limpar_pasta(pst1);
     *pst1 = novaPasta;
 }
-
-#pragma endregion fazer_os_codigos
-
-#pragma region Codigo_Feito
+*/
 /*Criação das Alocações Dinâmicas*/
 
 //Aloca espaço para um int
@@ -202,7 +201,7 @@ void limpar_pasta(PASTA* pst) {
 void copiar_string(STRING* new, STRING* str) {
     strcpy(*new,*str);
 }
-
+/*
 void copiar_paragrafo(PARAGRAFO* new, PARAGRAFO* par) {
     int i;
     for (int i=0; (*par)[i]!= NULL; i++) {
@@ -227,6 +226,7 @@ void copiar_pasta(PASTA* new, PASTA* pst) {
     }
     new[i] = NULL;
 }
+*/
 
 /*Tamanho nas Alocações Dinâmicas*/
 
@@ -237,15 +237,16 @@ int tam_paragrafo(PARAGRAFO* par) {
     return i;
 }
 
-size_t tam_registro(REGISTRO* reg) {
-    return(sizeof(*reg));
+int tam_pasta(PASTA* pst) {
+    int i;
+    for (i=0; (*pst)[i] != NULL; i++) {
+    }
+    return i;
 }
 
-size_t tam_pasta(PASTA* pst) {
-    return (sizeof(*pst));
-}
+#pragma endregion codigo_feito
 
-#pragma endregion Codigo_Feito
+#pragma region trabalho_anterior
 
 FILE* abrir_arquivo_binario(STRING nome_do_arquivo) {
 
@@ -277,8 +278,11 @@ FILE* abrir_arquivo_binario(STRING nome_do_arquivo) {
     return arq;
 }
 
-//Funcoes de trabalho com strings de tamanho variavel.
 
+#pragma region cemiterio_de_funcoes
+
+//Funcoes de trabalho com strings de tamanho variavel.
+/*
 void adicionar_caractere_string(STRING *string, char caractere) {
     STRING segunda_string;
 
@@ -321,107 +325,136 @@ void adicionar_registro_pasta(REGISTRO** pasta, REGISTRO* registro) {
     limpar_pasta(pasta);
     pasta = segunda_pasta;
 }
+*/
+
+#pragma endregion cemiterio_de_funcoes
 
 PASTA carregar_dados(STRING nomeArquivoInsercao) {
     FILE* arq;
     arq = abrir_arquivo_binario(nomeArquivoInsercao);
     if (arq == NULL) {
         // Tratamento de erro: não foi possível abrir o arquivo.
-        perror("Erro ao abrir o arquivo binário");
-        return NULL;
+        atualiza_log("Erro ao abrir o arquivo binario de insercao.");
+        exit(0);
     }
-    printf("Existe");
-    int i;
+
     int cont;
     char caractere;
     PASTA pasta = criar_pasta();
     REGISTRO registro;
     bool fim_de_arquivo = false;
 
-    STRING inteiro = "0"; 
-    atoi(inteiro);
+    STRING inteiro;
 
-    for (i=0; !fim_de_arquivo; i++) {
-    printf("\nLaco %d fim do arquivo = %d", i, fim_de_arquivo);
+    while (!fim_de_arquivo) {
         
         registro = criar_registro();
         inteiro = criar_string();
-        printf("\nPos %d\n", i);
 
         while(((cont = fread(&caractere,sizeof(char),1,arq)) != 0) && caractere != '\0'){
-
-            adicionar_caractere_string(&registro->codCliente,caractere);
+            add_caractere_string(&(registro->codCliente),caractere);
         }
-
-            printf("\nPos1 %d\n", i);
 
         while(((cont = fread(&caractere,sizeof(char),1,arq)) != 0) && caractere != '\0'){
-
-            adicionar_caractere_string(&registro->codVeiculo,caractere);
+            add_caractere_string(&(registro->codVeiculo),caractere);
         }
-
-            printf("\nPos2 %d\n", i);
 
         while(((cont = fread(&caractere,sizeof(char),1,arq)) != 0) && caractere != '\0'){
-
-            adicionar_caractere_string(&registro->nomeCliente,caractere);
+            add_caractere_string(&(registro->nomeCliente),caractere);
         }
 
-            printf("\nPos3 %d\n", i);
+        while (((cont = fread(&caractere,sizeof(char),1,arq)) != 0) && caractere == '\0') {}
 
-        for (fread(&caractere,sizeof(char),1,arq);caractere == '\0';fread(&caractere,sizeof(char),1,arq)) {}
+        add_caractere_string(&registro->nomeVeiculo,caractere);
+        while(((cont = fread(&caractere,sizeof(char),1,arq)) != 0) && caractere != '\0'){
+            add_caractere_string(&registro->nomeVeiculo,caractere);
+        }
+
+        while (((cont = fread(&caractere,sizeof(char),1,arq)) != 0) && caractere == '\0') {}
+
+        add_caractere_string(&inteiro,caractere);
+        while(((cont = fread(&caractere,sizeof(char),1,arq)) != 0) && caractere != '\0'){
+            add_caractere_string(&inteiro,caractere);
+        }
+
+        while (((cont = fread(&caractere,sizeof(char),1,arq)) != 0) && caractere == '\0') {}
         fseek(arq,(-1)*sizeof(char),SEEK_CUR);
-
-        printf("\nPos4 %d\n", i);
-
-        while(((cont = fread(&caractere,sizeof(char),1,arq)) != 0) && caractere != '\0'){
-
-            adicionar_caractere_string(&registro->nomeVeiculo,caractere);
-        }
-
-            printf("\nPos5 %d\n", i);
-
-        for (fread(&caractere,sizeof(char),1,arq);caractere == '\0';fread(&caractere,sizeof(char),1,arq)) {}
-        fseek(arq,(-1)*sizeof(char),SEEK_CUR);
-
-        printf("\nPos6 %d\n", i);
-
-        while(((cont = fread(&caractere,sizeof(char),1,arq)) != 0) && caractere != '\0'){
-
-            adicionar_caractere_string(&inteiro,caractere);
-        }
-
-            printf("\nPos7 %d\n", i);
-
-        for (fread(&caractere,sizeof(char),1,arq);caractere == '\0';fread(&caractere,sizeof(char),1,arq)) {}
-        fseek(arq,(-1)*sizeof(char),SEEK_CUR);
-        printf("\nPos8 %d\n", i);
 
         *(registro->quantDias) = atoi(inteiro);
         limpar_string(&inteiro);
 
         if (cont==0) {
-            limpar_registro(&registro);
-            limpar_string(&inteiro);
             fim_de_arquivo = true;
-            break;
         }
-        adicionar_registro_pasta(&pasta,&registro);
+        
+        add_registro_pasta(&pasta,&registro);
     }
-    atualiza_log("Arquivo Dados Carregado.");
+    atualiza_log("Arquivo de Insercao Carregado.");
+    fclose(arq);
     return pasta;
 }
 
+PARAGRAFO carregar_chaves(STRING nomeArquivoChaves) {
+    FILE* arq;
+    arq = abrir_arquivo_binario(nomeArquivoChaves);
+    if (arq == NULL) {
+        // Tratamento de erro: não foi possível abrir o arquivo.
+        atualiza_log("Erro ao abrir o arquivo binario de chaves.");
+        exit(0);
+    }
+    
+    int cont;
+    char caractere;
+    PARAGRAFO paragrafo = criar_paragrafo();
+    bool fim_de_arquivo = false;
 
+    STRING codCliente;
+    STRING codVeiculo;
+
+    while (!fim_de_arquivo) {
+        
+        codCliente = criar_string();
+        codVeiculo = criar_string();
+
+        while(((cont = fread(&caractere,sizeof(char),1,arq)) != 0) && caractere != '\0'){
+            add_caractere_string(&codCliente,caractere);
+        }
+
+        while(((cont = fread(&caractere,sizeof(char),1,arq)) != 0) && caractere != '\0'){
+            add_caractere_string(&codVeiculo,caractere);
+        }
+
+        if (cont==0) {
+            fim_de_arquivo = true;
+        }
+
+        add_string_string(&codCliente, &codVeiculo);
+        add_string_paragrafo(&paragrafo,&codCliente);
+        limpar_string(&codCliente);
+        limpar_string(&codVeiculo);
+    }
+    
+    atualiza_log("Arquivo de Chaves de Busca Carregado.");
+    fclose(arq);
+    return paragrafo;
+}
+
+#pragma endregion trabalho_anterior
 
 int main() {
+    int i;
 
-    STRING a = (STRING) malloc(sizeof(char)*7);
-    a = "string";
+    PASTA pasta = carregar_dados("insere.bin");
+    for (i=0;pasta[i]!=NULL;i++) {
+        printf("Registro %d:\n", i+1);
+        printf("%s\n", (pasta[i])->codCliente);
+        printf("%s\n", (pasta[i])->codVeiculo);
+        printf("%s\n", (pasta[i])->nomeCliente);
+        printf("%s\n", (pasta[i])->nomeVeiculo);
+        printf("%d\n\n", *((pasta[i])->quantDias));
+    }
 
-    STRING b = (STRING) malloc(sizeof(a)+1);
-    strcpy(b,a);
-
-    printf("%s", b);
-
+    PARAGRAFO paragrafo = carregar_chaves("busca_p.bin");
+    for (i=0;paragrafo[i]!=NULL;i++)
+        printf("%s\n", paragrafo[i]);
 }

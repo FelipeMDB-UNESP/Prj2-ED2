@@ -48,25 +48,31 @@ void rmv_last_string_paragrafo(PARAGRAFO* par);
 void rmv_last_registro_pasta(PASTA* pst);
 
 
-/*Copia nas Alocações Dinâmicas*/
+/*Copia nas Alocações Dinâmicas - FEITO*/
+void copiar_string(STRING* new, STRING* str);
 
-STRING copiar_string(STRING* str);
-PARAGRAFO copiar_paragrafo(PARAGRAFO* par);
-REGISTRO copiar_registro(REGISTRO* reg);
-PASTA copiar_pasta(PASTA* pst);
-
-
-/*Tamanho nas Alocações Dinâmicas*/
-
-size_t tam_paragrafo(PARAGRAFO* par);
+/*Tamanho nas Alocações Dinâmicas - FEITO*/
+int tam_pasta(PASTA* pst);
+int tam_paragrafo(PARAGRAFO* par);
 size_t tam_registro(REGISTRO* reg);
-size_t tam_pasta(PASTA* pst);
+
 
 /*Comparação nas Alocações Dinâmicas*/
 
 int comparar_paragrafos(PARAGRAFO* par1, PARAGRAFO* par2);
 int comparar_registros(REGISTRO* reg1, REGISTRO* reg2);
 int comparar_pastas(PASTA* pst1, PASTA* pst2);
+
+REGISTRO criar_registro();
+NUMERO criar_numero();
+STRING criar_string();
+
+void limpar_numero(NUMERO* num);
+void limpar_string(STRING* str);
+void limpar_paragrafo(PARAGRAFO* par);
+void limpar_registro(REGISTRO* reg);
+void limpar_pasta(PASTA* pst);
+
 
 void atualiza_log(char* sentenca) {
 

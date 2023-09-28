@@ -343,7 +343,7 @@ void atualizarIndice(FILE* arquivoIndice, size_t byteOffset, STRING chavePrimari
 
     // Escrever o novo índice (byteOffset) no arquivo de índices
     fwrite(&byteOffset, sizeof(size_t), 1, arquivoIndice);
-    fwrite(chavePrimaria, sizeof(char), strlen(chavePrimaria) + 1, arquivoIndice);
+    fwrite(chavePrimaria, sizeof(char), strlen(chavePrimaria), arquivoIndice);
 }
 // Insere o registro desejado no arquivo de registros
 void inserirRegistro(FILE* arquivoDados, FILE* arquivoIndice, PASTA pasta) {
@@ -363,8 +363,6 @@ void inserirRegistro(FILE* arquivoDados, FILE* arquivoIndice, PASTA pasta) {
     size_t byteOffset = calcularTamanhoArquivo(arquivoDados);
     
     STRING chavePrimaria = (STRING)malloc(strlen(pasta[posRegistro-1]->codCliente) + strlen(pasta[posRegistro-1]->codVeiculo) + 1);
-    //strcat(chavePrimaria, novoRegistro[posRegistro].codCliente);
-    //strcat(chavePrimaria, novoRegistro[posRegistro].codVeiculo);
 
     if (chavePrimaria != NULL) {
     strcpy(chavePrimaria, ""); // Inicialize a chavePrimaria com uma string vazia
@@ -376,7 +374,7 @@ void inserirRegistro(FILE* arquivoDados, FILE* arquivoIndice, PASTA pasta) {
 
 
     // Atualizar o arquivo de índices com o novo byte offset
-    atualizarIndice(arquivoIndice, calcularTamanhoArquivo(arquivoDados) - sizeof(size_t), chavePrimaria);
+    atualizarIndice(arquivoIndice, byteOffset, chavePrimaria);
 
     // libereção de memória não mais necessária
     free(chavePrimaria);
@@ -385,7 +383,7 @@ void inserirRegistro(FILE* arquivoDados, FILE* arquivoIndice, PASTA pasta) {
     fwrite(&tamanhoRegistro, 1, 1, arquivoDados);
 
     // Crie cópias das strings com '|' como separador
-    char codClienteCopy[strlen(pasta[posRegistro - 1]->codCliente) + 2]; // +2 para acomodar o '|' e o '\0'
+    char codClienteCopy[strlen(pasta[posRegistro - 1]->codCliente) + 2]; // +2 para acomodar o '|'
     char codVeiculoCopy[strlen(pasta[posRegistro - 1]->codVeiculo) + 2];
     char nomeClienteCopy[strlen(pasta[posRegistro - 1]->nomeCliente) + 2];
     char nomeVeiculoCopy[strlen(pasta[posRegistro - 1]->nomeVeiculo) + 2];
@@ -417,6 +415,83 @@ void inserirRegistro(FILE* arquivoDados, FILE* arquivoIndice, PASTA pasta) {
     printf("Novo registro inserido no byte offset: %lu\n", byteOffset);
 }
 #pragma endregion funcoes_inserir
+
+// Estrutura para armazenar informações do índice
+struct Indice {
+    size_t byteOffset;
+    char chavePrimaria[18];
+};
+
+// Função para comparar duas chaves primárias
+int compararChaves(const void* a, const void* b) {
+    return strncmp(((struct Indice*)a)->chavePrimaria, ((struct Indice*)b)->chavePrimaria, 18);
+}
+
+void pesquisarPorChavePrimaria(FILE* arquivoIndice, FILE* arquivoDados, STRING chavePrimaria) {
+    // Lê todos os índices do arquivo de índices
+    struct Indice* indices = NULL;
+    size_t numIndices = 0;
+    
+    while (1) {
+        struct Indice indiceLido;
+        size_t bytesLidos = fread(&(indiceLido.byteOffset), sizeof(size_t), 1, arquivoIndice);
+        if (bytesLidos != 1) {
+            break; // Fim do arquivo de índices
+        }
+        size_t bytesRead = fread(indiceLido.chavePrimaria, sizeof(char), 18, arquivoIndice);
+        if (bytesRead != 18) {
+            break; // Erro na leitura da chave primária
+        }
+        numIndices++;
+        indices = (struct Indice*)realloc(indices, numIndices * sizeof(struct Indice));
+        indices[numIndices - 1] = indiceLido;
+    }
+
+    // Ordena os índices por chave primária
+    qsort(indices, numIndices, sizeof(struct Indice), compararChaves);
+
+    // Realiza uma pesquisa binária para encontrar a chavePrimaria desejada
+    struct Indice chaveBuscada;
+    strncpy(chaveBuscada.chavePrimaria, chavePrimaria, 18); // Copia os primeiros 18 caracteres
+    struct Indice* resultado = (struct Indice*)bsearch(&chaveBuscada, indices, numIndices, sizeof(struct Indice), compararChaves);
+
+    if (resultado != NULL) {
+        // A chavePrimaria foi encontrada, use o byteOffset para ler os dados do registro no arquivo dados.bin
+        fseek(arquivoDados, resultado->byteOffset+sizeof(char), SEEK_SET);
+
+        REGISTRO registro = criar_registro();
+        char caractere;
+
+        while((fread(&caractere,sizeof(char),1,arquivoDados)) && caractere != '|'){
+            add_caractere_string(&(registro->codCliente),caractere);
+        }
+
+        while((fread(&caractere,sizeof(char),1,arquivoDados)) && caractere != '|'){
+            add_caractere_string(&(registro->codVeiculo),caractere);
+        }
+
+        while((fread(&caractere,sizeof(char),1,arquivoDados)) && caractere != '|'){
+            add_caractere_string(&(registro->nomeCliente),caractere);
+        }
+
+        while((fread(&caractere,sizeof(char),1,arquivoDados)) && caractere != '|'){
+            add_caractere_string(&registro->nomeVeiculo,caractere);
+        }
+
+        fread(registro->quantDias, sizeof(int), 1, arquivoDados);
+
+        printf("Registro encontrado:\n");
+        printf("Codigo cliente:%s\n", registro->codCliente);
+        printf("Codigo Veiculo:%s\n", registro->codVeiculo);
+        printf("Nome cliente:%s\n", registro->nomeCliente);
+        printf("Nome veiculo:%s\n", registro->nomeVeiculo);
+        printf("Quantidade de dias:%d\n\n", *(registro->quantDias));
+    }
+
+    // Libere a memória dos índices
+    free(indices);
+}
+
 
 int main() {
     

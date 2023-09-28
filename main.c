@@ -173,7 +173,7 @@ void add_registro_pasta(PASTA* pst, REGISTRO* reg) {
     novaPasta[tam] = *reg; // Adiciona o registro no fim da pasta
     novaPasta[tam+1] = NULL;
 
-    free(pst);
+    free(*pst);
 
     *reg = NULL;
     
@@ -368,8 +368,8 @@ void inserirRegistro(FILE* arquivoDados, FILE* arquivoIndice, PASTA pasta) {
 
     if (chavePrimaria != NULL) {
     strcpy(chavePrimaria, ""); // Inicialize a chavePrimaria com uma string vazia
-    strcat(chavePrimaria, pasta[posRegistro]->codCliente);
-    strcat(chavePrimaria, pasta[posRegistro]->codVeiculo);
+    strcat(chavePrimaria, pasta[posRegistro - 1]->codCliente);
+    strcat(chavePrimaria, pasta[posRegistro - 1]->codVeiculo);
     } else {
         printf("Falha na alocacao de memoria.\n");
     }
@@ -385,21 +385,21 @@ void inserirRegistro(FILE* arquivoDados, FILE* arquivoIndice, PASTA pasta) {
     fwrite(&tamanhoRegistro, 1, 1, arquivoDados);
 
     // Crie cópias das strings com '|' como separador
-    char codClienteCopy[strlen(pasta[posRegistro]->codCliente) + 2]; // +2 para acomodar o '|' e o '\0'
-    char codVeiculoCopy[strlen(pasta[posRegistro]->codVeiculo) + 2];
-    char nomeClienteCopy[strlen(pasta[posRegistro]->nomeCliente) + 2];
-    char nomeVeiculoCopy[strlen(pasta[posRegistro]->nomeVeiculo) + 2];
+    char codClienteCopy[strlen(pasta[posRegistro - 1]->codCliente) + 2]; // +2 para acomodar o '|' e o '\0'
+    char codVeiculoCopy[strlen(pasta[posRegistro - 1]->codVeiculo) + 2];
+    char nomeClienteCopy[strlen(pasta[posRegistro - 1]->nomeCliente) + 2];
+    char nomeVeiculoCopy[strlen(pasta[posRegistro - 1]->nomeVeiculo) + 2];
 
-    strcpy(codClienteCopy, pasta[posRegistro]->codCliente);
+    strcpy(codClienteCopy, pasta[posRegistro - 1]->codCliente);
     strcat(codClienteCopy, "|");
 
-    strcpy(codVeiculoCopy, pasta[posRegistro]->codVeiculo);
+    strcpy(codVeiculoCopy, pasta[posRegistro - 1]->codVeiculo);
     strcat(codVeiculoCopy, "|");
 
-    strcpy(nomeClienteCopy, pasta[posRegistro]->nomeCliente);
+    strcpy(nomeClienteCopy, pasta[posRegistro - 1]->nomeCliente);
     strcat(nomeClienteCopy, "|");
 
-    strcpy(nomeVeiculoCopy, pasta[posRegistro]->nomeVeiculo);
+    strcpy(nomeVeiculoCopy, pasta[posRegistro - 1]->nomeVeiculo);
     strcat(nomeVeiculoCopy, "|");
 
     // Escrevendo os campos no arquivo 
@@ -407,7 +407,7 @@ void inserirRegistro(FILE* arquivoDados, FILE* arquivoIndice, PASTA pasta) {
     fwrite(codVeiculoCopy, sizeof(char), strlen(codVeiculoCopy), arquivoDados);
     fwrite(nomeClienteCopy, sizeof(char), strlen(nomeClienteCopy), arquivoDados);
     fwrite(nomeVeiculoCopy, sizeof(char), strlen(nomeVeiculoCopy), arquivoDados);
-    fwrite(&(pasta[posRegistro]->quantDias), sizeof(int), 1, arquivoDados);
+    fwrite(&(pasta[posRegistro - 1]->quantDias), sizeof(int), 1, arquivoDados);
 
     
 
@@ -418,13 +418,15 @@ void inserirRegistro(FILE* arquivoDados, FILE* arquivoIndice, PASTA pasta) {
 
 int main() {
     
+    
     PASTA pasta;
     PARAGRAFO chaves;
 
     bool load_de_arquivos = false;
     int opcao;
-
+    
     do {
+        
         atualiza_log("Execucao do Menu");
 
         // Exibe o menu
@@ -436,9 +438,10 @@ int main() {
         printf("0. Sair\n");
         printf("Escolha uma opcao (0-4): ");
         scanf(" %d", &opcao);
+        
         FILE* arq_data;
         FILE* arq_index;
-
+        
         switch (opcao) {
             case 1:
                 if (load_de_arquivos) {
@@ -483,7 +486,8 @@ int main() {
             default:
                 atualiza_log("Opcao invalida. Por favor, escolha uma opcao valida (0-4).");
                 break;
-        }
+        } 
     } while (opcao != 0);   
+   
     return 0;
 }

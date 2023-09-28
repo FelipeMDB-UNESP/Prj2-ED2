@@ -409,7 +409,9 @@ void inserirRegistro(FILE* arquivoDados, FILE* arquivoIndice, PASTA pasta) {
     fwrite(nomeVeiculoCopy, sizeof(char), strlen(nomeVeiculoCopy), arquivoDados);
     fwrite(&(pasta[posRegistro - 1]->quantDias), sizeof(int), 1, arquivoDados);
 
-    
+    // Escrevendo o delimitador "|" no fim do registro
+    char delimitador = '|';
+    fwrite(&delimitador, sizeof(char), 1, arquivoDados);
 
 
     printf("Novo registro inserido no byte offset: %lu\n", byteOffset);

@@ -88,7 +88,7 @@ void limpar_pasta(PASTA* pst) {
 #pragma endregion limpeza_alocacoes_dinamicas
 
 #pragma region copia_alocacoes_dinamicas
-
+// Copia o conteudo de uma string para outra
 void copiar_string(STRING* new, STRING* str) {
     strcpy(*new,*str);
 }
@@ -96,14 +96,14 @@ void copiar_string(STRING* new, STRING* str) {
 #pragma endregion copia_alocacoes_dinamicas
 
 #pragma region tamanho_alocacoes_dinamicas
-
+// Calcula o tamanho de um vetor de strings
 int tam_paragrafo(PARAGRAFO* par) {
     int i;
     for (i=0; (*par)[i] != NULL; i++) {
     }
     return i;
 }
-
+// Calcula o tamanho de um vetor de registros
 int tam_pasta(PASTA* pst) {
     int i;
     for (i=0; (*pst)[i] != NULL; i++) {
@@ -114,7 +114,7 @@ int tam_pasta(PASTA* pst) {
 #pragma endregion tamanho_alocacoes_dinamicas
 
 #pragma region insercao_alocacoes_dinamicas
-
+// Adiciona um caractere a uma string
 void add_caractere_string(STRING* str, char caractere) {
     STRING novaString;
     novaString = (STRING) malloc(sizeof(char) * strlen(*str) + 2);
@@ -124,7 +124,7 @@ void add_caractere_string(STRING* str, char caractere) {
     limpar_string(str);
     *str = novaString;
 }
-
+// Faz a concatenação de duas strings
 void add_string_string(STRING* str1, STRING* str2) {
     STRING novaString;
     novaString = (STRING) malloc(strlen(*str1) + strlen(*str2) + 1);
@@ -133,7 +133,7 @@ void add_string_string(STRING* str1, STRING* str2) {
     limpar_string(str1);
     *str1 = novaString;
 }
-
+// Adiciona uma string ao vetor strings
 void add_string_paragrafo(PARAGRAFO* par, STRING* str) {
     
     int i;
@@ -159,18 +159,18 @@ void add_string_paragrafo(PARAGRAFO* par, STRING* str) {
     //Passa o novo paragrafo criado ao endereço recebido como parâmetro
     *par = novoParagrafo;
 }
-
+// Adiciona um registro no vetor de registros
 void add_registro_pasta(PASTA* pst, REGISTRO* reg) {
     int i;
     int tam = tam_pasta(pst);
     PASTA novaPasta;
     novaPasta = (PASTA) malloc(sizeof(REGISTRO) * (tam + 2));
-    
+    // Copia os elementos da pasta pst para a novaPasta
     for (int i = 0; i < tam; i++) {
         novaPasta[i] = (*pst)[i];
     }
 
-    novaPasta[tam] = *reg;
+    novaPasta[tam] = *reg; // Adiciona o registro no fim da pasta
     novaPasta[tam+1] = NULL;
 
     free(pst);
@@ -183,7 +183,7 @@ void add_registro_pasta(PASTA* pst, REGISTRO* reg) {
 #pragma endregion insercao_alocacoes_dinamicas
 
 #pragma endregion codigo_feito
-
+// Faz a abertura do arquivo binário
 FILE* abrir_arquivo_binario(STRING nome_do_arquivo) {
 
     FILE* arq;
@@ -216,6 +216,7 @@ FILE* abrir_arquivo_binario(STRING nome_do_arquivo) {
 
 //Funcoes de trabalho com strings de tamanho variavel.
 
+// Carrega os dados e retorna um vetor de registro
 PASTA carregar_dados(STRING nomeArquivoInsercao) {
     FILE* arq;
     arq = abrir_arquivo_binario(nomeArquivoInsercao);
@@ -232,7 +233,7 @@ PASTA carregar_dados(STRING nomeArquivoInsercao) {
     bool fim_de_arquivo = false;
 
     STRING inteiro;
-
+    // Faz a leitura dos registros do arquivo e adiciona num vetor de Registros
     while (!fim_de_arquivo) {
         
         registro = criar_registro();
@@ -280,7 +281,7 @@ PASTA carregar_dados(STRING nomeArquivoInsercao) {
     fclose(arq);
     return pasta;
 }
-
+// Carrega as chaves e retorna um vetor de strings
 PARAGRAFO carregar_chaves(STRING nomeArquivoChaves) {
     FILE* arq;
     arq = abrir_arquivo_binario(nomeArquivoChaves);
@@ -297,7 +298,7 @@ PARAGRAFO carregar_chaves(STRING nomeArquivoChaves) {
 
     STRING codCliente;
     STRING codVeiculo;
-
+    // Faz a leitura das chaves e adiciona num vetor de strings
     while (!fim_de_arquivo) {
         
         codCliente = criar_string();
@@ -344,67 +345,84 @@ void atualizarIndice(FILE* arquivoIndice, size_t byteOffset, STRING chavePrimari
     fwrite(&byteOffset, sizeof(size_t), 1, arquivoIndice);
     fwrite(chavePrimaria, sizeof(char), strlen(chavePrimaria) + 1, arquivoIndice);
 }
-
-void inserirRegistro(FILE* arquivoDados, FILE* arquivoIndice, REGISTRO novoRegistro) {
+// Insere o registro desejado no arquivo de registros
+void inserirRegistro(FILE* arquivoDados, FILE* arquivoIndice, PASTA pasta) {
 
     int posRegistro;
-    printf("Qual o índice do registro que deseja inserir?");
+    printf("Qual o indice do registro que deseja inserir?");
     scanf("%d", &posRegistro);
 
     // Calcular tamanho do registro
-    size_t tamanhoRegistro = strlen(novoRegistro[posRegistro].codCliente) + 1 +
-                             strlen(novoRegistro[posRegistro].codVeiculo) + 1 +
-                             strlen(novoRegistro[posRegistro].nomeCliente) + 1 +
-                             strlen(novoRegistro[posRegistro].nomeVeiculo) + 1 +
+    size_t tamanhoRegistro = strlen(pasta[posRegistro-1]->codCliente) + 1 +
+                             strlen(pasta[posRegistro-1]->codVeiculo) + 1 +
+                             strlen(pasta[posRegistro-1]->nomeCliente) + 1 +
+                             strlen(pasta[posRegistro-1]->nomeVeiculo) + 1 +
                              sizeof(int);
 
     // Obter o byte offset atual
     size_t byteOffset = calcularTamanhoArquivo(arquivoDados);
+    
+    STRING chavePrimaria = (STRING)malloc(strlen(pasta[posRegistro-1]->codCliente) + strlen(pasta[posRegistro-1]->codVeiculo) + 1);
+    //strcat(chavePrimaria, novoRegistro[posRegistro].codCliente);
+    //strcat(chavePrimaria, novoRegistro[posRegistro].codVeiculo);
 
-    // Escrever o tamanho do registro no início do registro
-    fwrite(&tamanhoRegistro, 1, 1, arquivoDados);
+    if (chavePrimaria != NULL) {
+    strcpy(chavePrimaria, ""); // Inicialize a chavePrimaria com uma string vazia
+    strcat(chavePrimaria, pasta[posRegistro]->codCliente);
+    strcat(chavePrimaria, pasta[posRegistro]->codVeiculo);
+    } else {
+        printf("Falha na alocacao de memoria.\n");
+    }
 
-    // Escrever os campos no arquivo de dados
-    fwrite(novoRegistro[posRegistro].codCliente, sizeof(char), strlen(novoRegistro[posRegistro].codCliente) + 1, arquivoDados);
-    fwrite(novoRegistro[posRegistro].codVeiculo, sizeof(char), strlen(novoRegistro[posRegistro].codVeiculo) + 1, arquivoDados);
-    fwrite(novoRegistro[posRegistro].nomeCliente, sizeof(char), strlen(novoRegistro[posRegistro].nomeCliente) + 1, arquivoDados);
-    fwrite(novoRegistro[posRegistro].nomeVeiculo, sizeof(char), strlen(novoRegistro[posRegistro].nomeVeiculo) + 1, arquivoDados);
-    fwrite(&(novoRegistro[posRegistro].quantDias), sizeof(int), 1, arquivoDados);
-
-    STRING chavePrimaria;
-    strcat(chavePrimaria, novoRegistro[posRegistro].codCliente);
-    strcat(chavePrimaria, novoRegistro[posRegistro].codVeiculo);
 
     // Atualizar o arquivo de índices com o novo byte offset
     atualizarIndice(arquivoIndice, calcularTamanhoArquivo(arquivoDados) - sizeof(size_t), chavePrimaria);
 
-    //printf("Novo registro inserido no byte offset: %lu\n", byteOffset);
+    // libereção de memória não mais necessária
+    free(chavePrimaria);
+
+    // Escrever o tamanho do registro no início do registro
+    fwrite(&tamanhoRegistro, 1, 1, arquivoDados);
+
+    // Crie cópias das strings com '|' como separador
+    char codClienteCopy[strlen(pasta[posRegistro]->codCliente) + 2]; // +2 para acomodar o '|' e o '\0'
+    char codVeiculoCopy[strlen(pasta[posRegistro]->codVeiculo) + 2];
+    char nomeClienteCopy[strlen(pasta[posRegistro]->nomeCliente) + 2];
+    char nomeVeiculoCopy[strlen(pasta[posRegistro]->nomeVeiculo) + 2];
+
+    strcpy(codClienteCopy, pasta[posRegistro]->codCliente);
+    strcat(codClienteCopy, "|");
+
+    strcpy(codVeiculoCopy, pasta[posRegistro]->codVeiculo);
+    strcat(codVeiculoCopy, "|");
+
+    strcpy(nomeClienteCopy, pasta[posRegistro]->nomeCliente);
+    strcat(nomeClienteCopy, "|");
+
+    strcpy(nomeVeiculoCopy, pasta[posRegistro]->nomeVeiculo);
+    strcat(nomeVeiculoCopy, "|");
+
+    // Escrevendo os campos no arquivo 
+    fwrite(codClienteCopy, sizeof(char), strlen(codClienteCopy), arquivoDados);
+    fwrite(codVeiculoCopy, sizeof(char), strlen(codVeiculoCopy), arquivoDados);
+    fwrite(nomeClienteCopy, sizeof(char), strlen(nomeClienteCopy), arquivoDados);
+    fwrite(nomeVeiculoCopy, sizeof(char), strlen(nomeVeiculoCopy), arquivoDados);
+    fwrite(&(pasta[posRegistro]->quantDias), sizeof(int), 1, arquivoDados);
+
+    
+
+
+    printf("Novo registro inserido no byte offset: %lu\n", byteOffset);
 }
 #pragma endregion funcoes_inserir
 
 int main() {
-
-    FILE* arq_data = abrir_arquivo_binario("data.bin");
-    if (arq_data == NULL) {
-        fclose(arq_data);
-        arq_data = fopen("data.bin","wb");
-        fclose(arq_data);
-        arq_data = fopen("data.bin","r+b");
-    }
-
-    FILE* arq_index = abrir_arquivo_binario("index.bin");
-    if (arq_index == NULL) {
-        fclose(arq_index);
-        arq_index = fopen("index.bin","wb");
-        fclose(arq_index);
-        arq_index = fopen("index.bin","r+b");
-    }
-
-    REGISTRO registro;
-    bool load_de_arquivos = false;
-    int opcao;
+    
     PASTA pasta;
     PARAGRAFO chaves;
+
+    bool load_de_arquivos = false;
+    int opcao;
 
     do {
         atualiza_log("Execucao do Menu");
@@ -418,11 +436,32 @@ int main() {
         printf("0. Sair\n");
         printf("Escolha uma opcao (0-4): ");
         scanf(" %d", &opcao);
+        FILE* arq_data;
+        FILE* arq_index;
 
         switch (opcao) {
             case 1:
                 if (load_de_arquivos) {
-                inserirRegistro();   
+
+                    FILE* arquivoDados = fopen("dados.bin", "ab+");
+
+                    if (arquivoDados == NULL) {
+                        perror("Erro ao abrir o arquivo de dados");
+                        return 1;
+                    }
+
+                    FILE* arquivoIndice = fopen("indices.bin", "ab+");
+
+                    if (arquivoIndice == NULL) {
+                        perror("Erro ao abrir o arquivo de índices");
+                        fclose(arquivoDados);
+                        return 1;
+                    }
+
+                    inserirRegistro(arquivoDados, arquivoIndice, pasta);   
+
+                    fclose(arquivoDados);
+                    fclose(arquivoIndice);
                 } break;
             case 2:
                 if (load_de_arquivos) {
@@ -439,16 +478,12 @@ int main() {
                 break;
             case 0:
                 atualiza_log("Execucao Finalizada.");
-                fcloseall();
+    
                 exit(0);
             default:
                 atualiza_log("Opcao invalida. Por favor, escolha uma opcao valida (0-4).");
                 break;
         }
     } while (opcao != 0);   
-
-
-
     return 0;
-
 }

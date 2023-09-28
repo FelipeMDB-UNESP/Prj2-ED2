@@ -1,44 +1,57 @@
 #include "header.h"
 
 // Função para calcular o tamanho de um arquivo
-size_t calcularTamanhoDoArquivo(FILE* arquivo) {
+size_t calcularTamanhoArquivo(FILE* arquivo) {
     fseek(arquivo, 0, SEEK_END);
     size_t tamanho = ftell(arquivo);
     rewind(arquivo);
     return tamanho;
 }
 
-void inserirRegistro(FILE* arquivoDados, DADOS novoRegistro) {
-    // Calcular tamanho do registro
-    size_t tamanhoRegistro = strlen(novoRegistro.codCliente) + 1 +
-                             strlen(novoRegistro.codVeiculo) + 1 +
-                             strlen(novoRegistro.nomeCliente) + 1 +
-                             strlen(novoRegistro.nomeVeiculo) + 1 +
-                             sizeof(int);
-
-    // Obter o byte offset atual
-    size_t byteOffset = tamanhoDoArquivo(arquivoDados);
-
-    // Escrever o tamanho do registro no início do registro
-    fwrite(&tamanhoRegistro, sizeof(size_t), 1, arquivoDados);
-
-    // Escrever os campos no arquivo de dados
-    fwrite(novoRegistro.codCliente, sizeof(char), strlen(novoRegistro.codCliente) + 1, arquivoDados);
-    fwrite(novoRegistro.codVeiculo, sizeof(char), strlen(novoRegistro.codVeiculo) + 1, arquivoDados);
-    fwrite(novoRegistro.nomeCliente, sizeof(char), strlen(novoRegistro.nomeCliente) + 1, arquivoDados);
-    fwrite(novoRegistro.nomeVeiculo, sizeof(char), strlen(novoRegistro.nomeVeiculo) + 1, arquivoDados);
-    fwrite(&(novoRegistro.quantDias), sizeof(int), 1, arquivoDados);
-
-    //printf("Novo registro inserido no byte offset: %lu\n", byteOffset);
-}
-
 // Função para atualizar o arquivo de índices
-void atualizarIndice(FILE* arquivoIndice, size_t byteOffset) {
+void atualizarIndice(FILE* arquivoIndice, size_t byteOffset, STRING chavePrimaria) {
     // Mover ponteiro de para o final do arquivo de índices
     fseek(arquivoIndice, 0, SEEK_END);
 
     // Escrever o novo índice (byteOffset) no arquivo de índices
     fwrite(&byteOffset, sizeof(size_t), 1, arquivoIndice);
+    fwrite(chavePrimaria, sizeof(char), strlen(chavePrimaria) + 1, arquivoIndice);
+}
+
+void inserirRegistro(FILE* arquivoDados, FILE* arquivoIndice, REGISTRO novoRegistro) {
+
+    int posRegistro;
+    printf("Qual o índice do registro que deseja inserir?");
+    scanf("%d", &posRegistro);
+
+    // Calcular tamanho do registro
+    size_t tamanhoRegistro = strlen(novoRegistro[posRegistro].codCliente) + 1 +
+                             strlen(novoRegistro[posRegistro].codVeiculo) + 1 +
+                             strlen(novoRegistro[posRegistro].nomeCliente) + 1 +
+                             strlen(novoRegistro[posRegistro].nomeVeiculo) + 1 +
+                             sizeof(int);
+
+    // Obter o byte offset atual
+    size_t byteOffset = calcularTamanhoArquivo(arquivoDados);
+
+    // Escrever o tamanho do registro no início do registro
+    fwrite(&tamanhoRegistro, 1, 1, arquivoDados);
+
+    // Escrever os campos no arquivo de dados
+    fwrite(novoRegistro[posRegistro].codCliente, sizeof(char), strlen(novoRegistro[posRegistro].codCliente) + 1, arquivoDados);
+    fwrite(novoRegistro[posRegistro].codVeiculo, sizeof(char), strlen(novoRegistro[posRegistro].codVeiculo) + 1, arquivoDados);
+    fwrite(novoRegistro[posRegistro].nomeCliente, sizeof(char), strlen(novoRegistro[posRegistro].nomeCliente) + 1, arquivoDados);
+    fwrite(novoRegistro[posRegistro].nomeVeiculo, sizeof(char), strlen(novoRegistro[posRegistro].nomeVeiculo) + 1, arquivoDados);
+    fwrite(&(novoRegistro[posRegistro].quantDias), sizeof(int), 1, arquivoDados);
+
+    STRING chavePrimaria;
+    strcat(chavePrimaria, novoRegistro[posRegistro].codCliente);
+    strcat(chavePrimaria, novoRegistro[posRegistro].codVeiculo);
+
+    // Atualizar o arquivo de índices com o novo byte offset
+    atualizarIndice(arquivoIndice, calcularTamanhoArquivo(arquivoDados) - sizeof(size_t), chavePrimaria);
+
+    //printf("Novo registro inserido no byte offset: %lu\n", byteOffset);
 }
 
 int main() {
@@ -85,22 +98,23 @@ int main() {
     novoRegistro4.nomeVeiculo = "Voksvagem";
     novoRegistro4.quantDias = 45;
 
+    DADOS dados[4] = {novoRegistro1, novoRegistro2, novoRegistro3, novoRegistro4};
+    REGISTRO registro = dados;
+
     // Inserir o registro no final do arquivo de dados
-    inserirRegistro(arquivoDados, novoRegistro1);
-    // Atualizar o arquivo de índices com o novo byte offset
-    atualizarIndice(arquivoIndice, tamanhoDoArquivo(arquivoDados) - sizeof(size_t));
-    // Inserir o registro no final do arquivo de dados
-    inserirRegistro(arquivoDados, novoRegistro2);
-    // Atualizar o arquivo de índices com o novo byte offset
-    atualizarIndice(arquivoIndice, tamanhoDoArquivo(arquivoDados) - sizeof(size_t));
-    // Inserir o registro no final do arquivo de dados
-    inserirRegistro(arquivoDados, novoRegistro3);
-    // Atualizar o arquivo de índices com o novo byte offset
-    atualizarIndice(arquivoIndice, tamanhoDoArquivo(arquivoDados) - sizeof(size_t));
-    // Inserir o registro no final do arquivo de dados
-    inserirRegistro(arquivoDados, novoRegistro4);
-    // Atualizar o arquivo de índices com o novo byte offset
-    atualizarIndice(arquivoIndice, tamanhoDoArquivo(arquivoDados) - sizeof(size_t));
+    inserirRegistro(arquivoDados, arquivoIndice, registro);
+    // // Inserir o registro no final do arquivo de dados
+    // inserirRegistro(arquivoDados, registro);
+    // // Atualizar o arquivo de índices com o novo byte offset
+    // atualizarIndice(arquivoIndice, calcularTamanhoArquivo(arquivoDados) - sizeof(size_t));
+    // // Inserir o registro no final do arquivo de dados
+    // inserirRegistro(arquivoDados, registro);
+    // // Atualizar o arquivo de índices com o novo byte offset
+    // atualizarIndice(arquivoIndice, calcularTamanhoArquivo(arquivoDados) - sizeof(size_t));
+    // // Inserir o registro no final do arquivo de dados
+    // inserirRegistro(arquivoDados, registro);
+    // // Atualizar o arquivo de índices com o novo byte offset
+    // atualizarIndice(arquivoIndice, calcularTamanhoArquivo(arquivoDados) - sizeof(size_t));
 
     // Fechar os arquivos
     fclose(arquivoDados);

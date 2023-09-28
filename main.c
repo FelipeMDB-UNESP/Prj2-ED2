@@ -357,7 +357,7 @@ void inserirRegistro(FILE* arquivoDados, FILE* arquivoIndice, PASTA pasta) {
                              strlen(pasta[posRegistro-1]->codVeiculo) + 1 +
                              strlen(pasta[posRegistro-1]->nomeCliente) + 1 +
                              strlen(pasta[posRegistro-1]->nomeVeiculo) + 1 +
-                             sizeof(int);
+                             sizeof(int) + 1;
 
     // Obter o byte offset atual
     size_t byteOffset = calcularTamanhoArquivo(arquivoDados);
@@ -420,7 +420,7 @@ void inserirRegistro(FILE* arquivoDados, FILE* arquivoIndice, PASTA pasta) {
 
 int main() {
     
-    
+    int tam;
     PASTA pasta;
     PARAGRAFO chaves;
 
@@ -448,32 +448,38 @@ int main() {
             case 1:
                 if (load_de_arquivos) {
 
-                    FILE* arquivoDados = fopen("dados.bin", "ab+");
+                    arq_data = fopen("dados.bin", "ab+");
 
-                    if (arquivoDados == NULL) {
+                    if (arq_data == NULL) {
                         perror("Erro ao abrir o arquivo de dados");
                         return 1;
                     }
 
-                    FILE* arquivoIndice = fopen("indices.bin", "ab+");
+                    arq_index = fopen("indices.bin", "ab+");
 
-                    if (arquivoIndice == NULL) {
+                    if (arq_index == NULL) {
                         perror("Erro ao abrir o arquivo de índices");
-                        fclose(arquivoDados);
+                        fclose(arq_data);
                         return 1;
                     }
 
-                    inserirRegistro(arquivoDados, arquivoIndice, pasta);   
+                    printf("\nDigite um numero entre 1 e %d\n", tam);
+                    inserirRegistro(arq_data, arq_index, pasta);   
 
-                    fclose(arquivoDados);
-                    fclose(arquivoIndice);
-                } break;
+                    fclose(arq_data);
+                    fclose(arq_index);
+                }
+                else {
+                    printf("Arquivos ainda nao foram carregados!\n");
+                } 
+                break;
             case 2:
                 if (load_de_arquivos) {
                     
                 } break;
             case 3:
                 pasta = carregar_dados("insere.bin");
+                tam = tam_pasta(&pasta);
                 chaves = carregar_chaves("busca_p.bin");
                 atualiza_log("Arquivos carregados.");
                 load_de_arquivos = true;

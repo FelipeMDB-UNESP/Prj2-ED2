@@ -372,6 +372,21 @@ void inserirRegistro(FILE* arquivoDados, FILE* arquivoIndice, PASTA pasta) {
         printf("Falha na alocacao de memoria.\n");
     }
 
+    //Faz a checagem se esse registro já foi inserido
+    char chaveTeste[19];
+    char bufferLixo[8]; 
+    fseek(arquivoIndice,sizeof(char) * 8, SEEK_SET);
+    while (fread(chaveTeste, sizeof(chaveTeste), 1 ,arquivoIndice) == 1)
+    {
+        fread(bufferLixo, sizeof(char), 8 ,arquivoIndice);
+        if(strcmp(chavePrimaria, chaveTeste) == 0) // Já possui aquela chave
+        {
+            atualiza_log("Registro nao adicionado.");
+            printf("\nRegistro ja existe!\n\n");
+            free(chavePrimaria);
+            return;
+        }
+    }
 
     // Atualizar o arquivo de índices com o novo byte offset
     atualizarIndice(arquivoIndice, byteOffset, chavePrimaria);
@@ -523,20 +538,9 @@ int main() {
             case 1:
                 if (load_de_arquivos) {
 
-                    arq_data = fopen("dados.bin", "ab+");
+                    arq_data = fopen("dados.bin", "a+b");
 
-                    if (arq_data == NULL) {
-                        perror("Erro ao abrir o arquivo de dados");
-                        return 1;
-                    }
-
-                    arq_index = fopen("indices.bin", "ab+");
-
-                    if (arq_index == NULL) {
-                        perror("Erro ao abrir o arquivo de índices");
-                        fclose(arq_data);
-                        return 1;
-                    }
+                    arq_index = fopen("indices.bin", "a+b");
 
                     printf("\nDigite um numero entre 1 e %d\n", tam);
                     inserirRegistro(arq_data, arq_index, pasta);   
@@ -550,6 +554,18 @@ int main() {
                 break;
             case 2:
                 if (load_de_arquivos) {
+
+                    arq_data = fopen("dados.bin", "a+b");
+
+                    arq_index = fopen("indices.bin", "a+b");
+                    int posChave;
+                    printf("Qual a posicao da chave que você deseja pesquisar?\n");
+                    scanf(" %d", &posChave);
+
+
+
+                    pesquisarPorChavePrimaria(arq_index, arq_data, chaves[posChave-1]);
+
                     
                 } break;
             case 3:
